@@ -286,9 +286,51 @@ public class PolybiusSquareScript : MonoBehaviour
             };
 
         }
+    }
+#pragma warning disable 0414
+    private readonly string TwitchHelpMessage = "!{0} press ABCDE [Press buttons with labels A, B, C, D, E.] | Command must contain 5 letters.";
+#pragma warning restore 0414
 
+    private IEnumerator ProcessTwitchCommand(string command)
+    {
+        var m = Regex.Match(command, @"^\s*(press|submit)\s+(?<letters>[A-Z ,;]+)\s*$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        if (!m.Success)
+            yield break;
+        _answerSoFar = "";
+        var input = m.Groups["letters"].Value.ToUpperInvariant();
+        var btnLetters = ButtonLabels.Select(i => i.text).ToArray();
+        var list = new List<int>();
+        for (int i = 0; i < input.Length; i++)
+        {
+            if (input[i].ToString() == " " || input[i].ToString() == "," || input[i].ToString() == ";")
+                continue;
+            int index = Array.IndexOf(btnLetters, input[i].ToString());
+            if (index == -1)
+            {
+                yield return "sendtochaterror The letter " + input[i].ToString() + " does not exist!";
+                yield break;
+            }
+            list.Add(index);
+        }
+        if (list.Count != 5)
+            yield break;
+        yield return null;
+        for (int i = 0; i < 5; i++)
+        {
+            Buttons[list[i]].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
+    }
 
-
+    private IEnumerator TwitchHandleForcedSolve()
+    {
+        _answerSoFar = "";
+        var btnLetters = ButtonLabels.Select(i => i.text).ToArray();
+        for (int i = 0; i < 5; i++)
+        {
+            Buttons[Array.IndexOf(btnLetters, _solution[i].ToString())].OnInteract();
+            yield return new WaitForSeconds(0.1f);
+        }
     }
 }
 
