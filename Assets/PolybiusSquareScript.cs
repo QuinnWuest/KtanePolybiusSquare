@@ -155,7 +155,18 @@ public class PolybiusSquareScript : MonoBehaviour
             }
         }
 
-        tableNumber = (tableNumber * BombInfo.GetBatteryCount()) % 10;
+
+        tableNumber = tableNumber * BombInfo.GetBatteryCount();
+        int sum = 0;
+        while (tableNumber != 0){
+            sum = (tableNumber % 10) + sum;
+            tableNumber = (tableNumber / 10);
+        }
+
+        tableNumber = sum % 10;
+
+        Debug.LogFormat("[Polybius Square #{0}] The table used is {1}.", _moduleId, tableNumber);
+
         string[][] Table = Tables(tableNumber);
 
         numbers[0] = numbers[0] - 11;
